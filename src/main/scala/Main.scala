@@ -1,8 +1,16 @@
+import MyDB.db
+
+import slick.jdbc.H2Profile.api._
 import scala.concurrent.{Await, Future, Promise}
 import scala.swing
 import scala.swing.{Frame, SimpleSwingApplication}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 import scala.io.StdIn.readLine
+
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.concurrent.Await
 
 object Main {
     def main(args: Array[String]): Unit = {
@@ -13,7 +21,7 @@ object Main {
         println("You can get information on a specific airport" +
           " by typing Query followed by airport name or code")
 
-        val action = readLine()
+        val action = "ok"//readLine()
 
         if (action.contains(" "))
         {
@@ -25,7 +33,7 @@ object Main {
         }
         else if (action.contentEquals("Report"))
         {
-            println("Call to Report")
+            DBQueries.report()
         }
     }
 }

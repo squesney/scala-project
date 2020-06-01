@@ -47,9 +47,9 @@ object DBQueries {
       .on(_._1 === _.id)
       .join(countries)
       .on(_._2.country_ident === _.code)
-      .filter(c => (c._2.name.startsWith(name) || c._2.code.startsWith(name)))
+      .filter(c => (c._2.name.startsWith(name) || c._2.code.startsWith(name) && c._1._1._2 =!= ""))
       .map{case (r) => (r._2.name, r._1._2.ident, r._1._1._2)}
-      .filter(_._3 =!= "")
+      .sortBy( r => (r._1, r._2, r._3))
       .result
 
 

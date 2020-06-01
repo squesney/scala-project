@@ -21,14 +21,14 @@ object Main {
         println("You can get information on a specific airport" +
           " by typing Query followed by airport name or code")
 
-        val action = "ok"//readLine()
+        val action = readLine()
 
         if (action.contains(" "))
         {
             val query = action.split(" ")
             if (query(0).contentEquals("Query"))
             {
-                println("Call to Query with argument")
+                DBQueries.query(query(1))
             }
         }
         else if (action.contentEquals("Report"))

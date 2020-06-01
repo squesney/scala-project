@@ -37,4 +37,22 @@ object DBQueries {
       .map{case (r) => (r._2.name, r._1._2.ident, r._1._1._2)}
       .filter(_._3 =!= "")
   }
+
+  // Query Option will ask the user for the country name or code
+  // and display the airports & runways at each airport. The input can be country code or country name.
+  def query(name: String) =
+  {
+    val q = runways.map(r => (r.airport_id, r.surface))
+      .join(airports)
+      .on(_._1 === _.id)
+      .join(countries)
+      .on(_._2.country_ident === _.code)
+      .filter(c => (c._2.name.startsWith(name) || c._2.code.startsWith(name)))
+      .map{case (r) => (r._2.name, r._1._2.ident, r._1._1._2)}
+      .filter(_._3 =!= "")
+      .result
+
+
+    Await.result(db.run(q).map(_.foreach(e => println(e))), Duration.Inf)
+  }
 }

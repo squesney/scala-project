@@ -4,6 +4,8 @@ import slick.jdbc.H2Profile.api._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
+import scala.collection.parallel.immutable._
+import scala.collection.parallel.CollectionConverters._
 
 object MyDB {
     val db = Database.forURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
@@ -50,17 +52,21 @@ object MyDB {
                  raw_countries: Array[Array[String]],
                  raw_runways: Array[Array[String]]) =
     {
-        val insert_countries = countries ++= raw_countries.map(arr => (arr(0).toInt, arr(1), arr(2), arr(3))).toSeq
-        val insert_aitports: DBIO[Option[Int]] = airports ++= raw_airports.map(arr =>
-            (arr(0).toInt, arr(1), arr(3), arr(7), arr(8), arr(9), arr(10))).toSeq
-        val insert_runways = runways ++= raw_runways.map(arr => (arr(0).toInt, arr(1).toInt, arr(2), arr(5), arr(8))).toSeq
-        Await.result(db.run((insert_countries >> insert_aitports >> insert_runways).transactionally), Duration.Inf)
+        val insert_countries = countries ++= raw_countries.par.map(arr => (arr(0).toInt, arr(1), arr(2), arr(3))).to(Seq)
+        val insert_aitports: DBIO[Option[Int]] = airports ++= raw_airports.par.map(arr =>
+            (arr(0).toInt, arr(1), arr(3), arr(7), arr(8), arr(9), arr(10))).to(Seq)
+        val insert_runways = runways ++= raw_runways.par.map(arr => (arr(0).toInt, arr(1).toInt, arr(2), arr(5), arr(8))).to(Seq)
+        Await.result(db.run((insert_countries >> insert_aitports >> insert_runways)), Duration.Inf)
     }
 
     def print() = {
         println("airports:")
-        Await.result(db.run(airports.result).map(_.foreach(e => println(e))), Duration.Inf)
+        Await.result(db.run(airports.take(10).result).map(_.foreach(e => println(e))), Duration.Inf)
+        println("countries:")
+        Await.result(db.run(countries.take(10).result).map(_.foreach(e => println(e))), Duration.Inf)
+        println("runways:")
+        Await.result(db.run(runways.take(10).result).map(_.foreach(e => println(e))), Duration.Inf)
     }
 
-    def close: Unit = db.close()
+    def close(): Unit = db.close()
 }

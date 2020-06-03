@@ -5,7 +5,6 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.collection.parallel.immutable._
-import scala.collection.parallel.CollectionConverters._
 
 object MyDB {
     val db = Database.forURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
@@ -52,10 +51,10 @@ object MyDB {
                  raw_countries: Array[Array[String]],
                  raw_runways: Array[Array[String]]) =
     {
-        val insert_countries = countries ++= raw_countries.par.map(arr => (arr(0).toInt, arr(1), arr(2), arr(3))).to(Seq)
+        val insert_countries = countries ++= raw_countries.par.map(arr => (arr(0).toInt, arr(1), arr(2), arr(3))).to(Seq.canBuildFrom)
         val insert_aitports: DBIO[Option[Int]] = airports ++= raw_airports.par.map(arr =>
-            (arr(0).toInt, arr(1), arr(3), arr(7), arr(8), arr(9), arr(10))).to(Seq)
-        val insert_runways = runways ++= raw_runways.par.map(arr => (arr(0).toInt, arr(1).toInt, arr(2), arr(5), arr(8))).to(Seq)
+            (arr(0).toInt, arr(1), arr(3), arr(7), arr(8), arr(9), arr(10))).to(Seq.canBuildFrom)
+        val insert_runways = runways ++= raw_runways.par.map(arr => (arr(0).toInt, arr(1).toInt, arr(2), arr(5), arr(8))).to(Seq.canBuildFrom)
         Await.result(db.run((insert_countries >> insert_aitports >> insert_runways)), Duration.Inf)
     }
 

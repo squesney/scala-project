@@ -14,24 +14,27 @@ import scala.io.StdIn
 
 object Main {
     def main(args: Array[String]): Unit = {
-        val (air, count, run) = CsvParser.parse(Array("airports.csv", "countries.csv", "runways.csv"))
-        MyDB.populate(air, count, run)
         if (args.contains("--help"))
         {
-            println("use: ")
+            println("use: stb run [--gui]\nA basic query app for an airport database.\n\n--gui for the graphical user interface\n")
         }
-        if (args.contains("--gui"))
-        {
-            val ui = new UI
-            ui.open()
-        }
-        else
-        {
-            println("You can get a Report by typing report")
-            println("You can get information on a specific airport" +
-                " by typing query followed by country name or code")
-            println("You can quit by typing quit")
-            read_infos()
+        else {
+            val (air, count, run) = CsvParser.parse(Array("airports.csv", "countries.csv", "runways.csv"))
+            MyDB.populate(air, count, run)
+            if (args.contains("--gui"))
+            {
+                val ui = new UI
+                ui.open()
+            }
+            else
+            {
+                println("You can get a Report by typing report")
+                println("You can get information on a specific airport" +
+                    " by typing query followed by country name or code")
+                println("You can quit by typing quit")
+                read_infos()
+                MyDB.close()
+            }
         }
     }
 
@@ -47,10 +50,9 @@ object Main {
         }
         else if (action.startsWith("report"))
         {
-            val test = DBQueries.print_reports()
+            DBQueries.print_reports()
         }
         if (!action.startsWith("quit"))
             read_infos()
     }
-    val frame = new Frame()
 }
